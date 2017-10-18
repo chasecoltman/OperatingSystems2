@@ -1,0 +1,188 @@
+\documentclass[journal,10pt,onecolumn,compsoc]{IEEEtran} \usepackage[margin=1.0in]{geometry} \usepackage{pdfpages} 
+\usepackage{caption,graphicx,float} 
+\usepackage{listings}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage{url}
+\usepackage{amsmath}
+\graphicspath{/graphics} \setlength{\parskip}{\baselineskip} \setlength\parindent{24pt}
+\usepackage[english]{babel}
+%\usepackage{fullpage}
+
+\title{TensorFlow\texttrademark WYSIWYG GUI Design Document}
+\author{Group 14: Chase Coltman, Alec Zitzelberger}
+\date{\today}
+\begin{document}
+
+\section{Kernel and VM Setup Steps Taken:}
+	\begin{enumerate}
+	\item Open up two shells, call them Shell A and Shell B.
+	\item Git clone git://git.yoctoproject.org/linux-yocto-3.19
+	\item Change extension to 3.19.2
+	\item Be inside the linux-yocto-3.19.2 directory
+	\item Mv ../../../files/bzImage-qemux86.bin .
+	\item Mv ../../../files/config-3.19.2-yocto-standard .
+	\item Mv ../../../files/environment-setup-i586-poky-linux .
+	\item Enter bash for both Shell A and B
+	\item Shell A: source environment-setup-i586-poky-linux
+	\item Shell A: qemu-system-i386 -gdb tcp::5514 -S -nographic -kernel bzImage-qemux86.bin -drive file=core-image-lsb-sdk-qemux86.ext4,if=virtio -enable-kvm -net none -usb -localtime --no-reboot --append "root=/dev/vda rw console=ttyS0 debug".
+	\item Shell B: source environment-setup-i586-poky-linux
+	\item Shell B: \$GDB
+	\item Shell B: Target remote : 5514, then enter continue and hit enter
+	\item Shell A: enter root and hit enter. Enter reboot and hit enter when ready to quit
+	\item Hey it worked! Now to make our own
+	\item Mv config-3.19.2-yocto-standard .config
+	\item Make -j4 all
+	\item Enter in make menuconfig
+	\item Go to general and change the kernel info to group 14 homework 1
+	\item Find bzImage in the folder arch/x86/boot/bzImage
+	\item Cp arch/x86/boot/bzImage /scratch/fall2017/14/linux-yocto-3.19.2
+	\item Shell A: source environment-setup-i586-poky-linux
+	\item Shell A: qemu-system-i386 -gdb tcp::5514 -S -nographic -kernel bzImage -drive file=core-image-lsb-sdk-qemux86.ext4,if=virtio -enable-kvm -net none -usb -localtime --no-reboot --append "root=/dev/vda rw console=ttyS0 debug".
+	\item Shell B: source environment-setup-i586-poky-linux
+	\item Shell B: \$GDB
+	\item Shell B: Target remote :5514
+	\item Shell B: Continue
+	\item Shell A: Root
+	\item Logged into VM and ready to go
+	\item Uname -a prints out our group number 14, homework 1
+\end{enumerate}
+
+\section {Flags}
+\textbf{Iqemu flags}
+\begin{enumerate}
+
+\item -gdb tcp::5514
+	\begin{enumerate}[label=(\Alph*)]
+		\item 	This opens a gdbserver on TCP port 5514.
+	\end{enumerate}
+
+\item -S
+	\begin{enumerate}[label=(\Alph*)]
+		\item 	This means Do not start CPU at startup.
+	\end{enumerate}
+
+\item -nographic
+	\begin{enumerate}[label=\Alph*]
+		\item 	Disables graphical output so that Qemu is a simple command line application.
+	\end{enumerate}
+
+\item -kernel bzImage
+	\begin{enumerate}[label=\Alph*]
+		\item 	This command says to use the bzImage as the kernel image, which can either be a linux kernel or in multiboot format.
+	\end{enumerate}
+
+\item -drive
+	\begin{enumerate}[label=\Alph*]
+		\item file=core-image-lsb-sdk-qemux86.ext
+			\begin{enumerate}[label=(\alph*)]
+				\item This option defines which disk image to use with this drive. For this situation, the disk image would be core-image-lsb-sdk-qemux86.ext
+			\end{enumerate}
+		\item if=virtio
+			\begin{enumerate}[label=(\alph*)]
+				\item This option defines on which type of interface is connected. 
+			\end{enumerate}
+	\end{enumerate}
+
+\item -enable-kvm
+	\begin{enumerate}[label=(\Alph*)]
+		\item Enable KVM full virtualization support. This option is only available if KVM support is enabled when compiling
+	\end{enumerate}
+
+\item -net-none
+	\begin{enumerate}[label=(\Alph*)]
+		\item Indicate that no network devices should be configured. It is used to override the default configuration which is activated if no -net options are provided
+	\end{enumerate}
+
+\item -usb
+	\begin{enumerate}[label=(\Alph*)]
+		\item Simply enables the USB driver
+	\end{enumerate}
+
+\item -locatime
+	\begin{enumerate}[label=(\Alph*)]
+		\item This is used to let the RTC start at the current local time
+	\end{enumerate}
+
+\item --no-reboot
+	\begin{enumerate}[label=(\Alph*)]
+	\item Exit instead of rebooting
+	\end{enumerate}
+
+\item --append “root=/dev/vda rw console=ttyS0 debug”
+	\begin{enumerate}[label=(\Alph*)]
+	\item This uses “root=/dev/vda rw console=ttyS0 debug” as the kernel command line
+	\end{enumerate}
+
+\end{enumerate}
+\section {Work Log}
+\textbf{Work.log for Chase Coltman}
+\begin{enumerate}	
+	\item Began working on installing Kernel and attempting to get it run. Worked through instructions until I got to
+		\begin{enumerate}[label=(\Alph*)]
+			\item Steps Taken:
+				\begin{enumerate}[label=(\alph*)]
+					\item Created the repo and gave permissions for Alec to be able to enter and make changes
+					\item Attempted to move files to the correct location
+				\end{enumerate}
+			\item Date - 9/30/2017
+			\item Time - About 2 hours
+			\item End-point - Frustrated and not sure what I am doing wrong
+			\item Finished - No, the Kernel had a bunch of error so I waited until next class to ask a peer
+		\end {enumerate}
+		
+	\item Attempted to work some more on getting Kernel to work
+		\begin{enumerate}[label=(\Alph*)]
+			\item Steps Taken:
+				\begin{enumerate}[label=(\alph*)]
+					\item Moved all the files into the correct directory
+					\item Seems to be working but not sure as it freezes when I run the code
+				\end{enumerate}
+			\item Date - 10/3/2017
+			\item Time - About 2 hours
+			\item End-point - Compiles and runs but freezes at the end
+			\item Finished -  No, Kernel is compiling but not sure on next step
+		\end {enumerate}
+		
+	\item Completed all the requirements for the Kernel to run
+		\begin{enumerate}[label=(\Alph*)]
+			\item Steps Taken:
+				\begin{enumerate}[label=(\alph*)]
+					\item Finally got it working. Everything was actually working on the 3rd when I attempted to do it before, just had to open another shell client.
+					\item Finished the implementation and did the write-up with all the steps that I took to figure it out
+				\end{enumerate}
+			\item Date - 10/5/2017
+			\item Time - About 3-4 hours
+			\item End-point - Runs and I am able to enter the kernel and VM with both the bzImage file and the one we make when we run make -j4 all
+			\item Finished - Yes, It worked and I followed all the steps to make sure
+		\end {enumerate}		
+			
+	\item Finished writing up what all the flags do
+		\begin{enumerate}[label=(\Alph*)]
+			\item Steps Taken:
+				\begin{enumerate}[label=(\alph*)]
+					\item Searched for qemu i386 flags to give me a detailed readme
+					\item Found this link: \url {http://www.tin.org/bin/man.cgi?section=1&topic=qemu-system-i386
+					\item Wrote in what each flag did and learned what exactly we do when we run that long command}
+					\item Wrote in what each flag did and learned what exactly we do when we run that long command
+				\end{enumerate}
+			\item Date - 10/7/2017
+			\item Time - About 1 hour
+			\item End-point - Finished
+			\item Finished -  Yes, Reason for it being approximately a time is because I was at work and actually have no idea how long it took
+		\end {enumerate}		
+			
+	\item Learning how to LaTeX
+		\begin{enumerate}[label=(\Alph*)]
+			\item Steps Taken:
+				\begin{enumerate}[label=(\alph*)]
+					\item Watched the online tutorial
+					\item Copy-pasted write up from Google Doc and formatted for LaTeX
+				\end{enumerate}
+			\item Date - 10/9/2017
+			\item Time - About 2 hours
+			\item End-point - Finished on my end, sending to Alec for his log and final product
+			\item Finished -  No
+		\end {enumerate}		
+	\end{enumerate}
+\end{document}

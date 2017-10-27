@@ -1,6 +1,9 @@
 
 This is the current implementation that Alec Zitzelberger was able to finish. 
 The logic we used for this was to check and see if a philosopher is able to grab two forks, one at a time, and if 
-not drop any forks grabbed and wait for the forks to be ready. This proved to not let anyway starve as the
+not drop any forks grabbed and wait for the forks to be ready. This proved to not let anyone starve as the
 philosophers who didn't get a chance to eat has a lower waiting period and gets priority over the others, as well as remove the 
 potential of deadlock or lifelock.
+
+Compilition Instruction:
+gcc Concurrency2V1.c mt.h -pthread -std=c99

@@ -1,5 +1,7 @@
 /*
 * Elevator Look
+* Reference: http://classes.engr.oregonstate.edu/eecs/fall2011/cs411/proj03.pdf
+* 
 */
 #include <linux/blkdev.h>
 #include <linux/elevator.h>
@@ -10,7 +12,7 @@
 
 struct sstf_data{
 	struct list_head queue;
-	int direction;
+	int current_direction;
 }
 
 //done
@@ -19,16 +21,46 @@ static void look_merged_requests (struct request_queue *q, struct request *rq, s
     list_del_init(&next->queuelist);
 }
 
-//Needs to be done
+//done
 static int look_dispatch(struct request_queue *q, int force)
 {
-	
+	struct look_data *nd = q->elevator->elevator_data;
+	if (!list_empty(&nd->queue)) {
+		struct request *rq = list_entry(nd->queue.next, struct request, queuelist);
+		list_del_init(&rq->queuelist);
+		elv_dispatch_sort(q, rq);
+		return 1;
+	}
+	return 0;
 }
 
 //Needs to be done
 static void look_add_request(struct request_queue *q, struct request *rq)
 {
+	struct look_data *nd = q->elevator->elevator_data;
+	struct request *next, *previous, *current;
 	
+	//Check to see if look_data is empty
+	printk("Attempting to add request \n");
+	if(list_empty(&nd->queue))
+	{
+		// If empty add request to the queue
+		printk("Empty! \n");
+		list_add_tail(&rq->queuelist, &nd->queue);
+	}
+	// Otherwise now we need to find a spot
+	else
+	{
+		//find spot to put the request in
+		next = list_entry(nd->queue.next, struct request, queuelist);
+		previous = list_entry(nd->queue.prev, struct request, queuelist);
+		while(blk_rq_pos(rq) > blk_rq_pos(next)){
+			next = list_entry(next->queuelist.next, struct request, queuelist);
+			prev = list_entry(prev->queuelist.prev, struct request, queuelist);
+		}
+		list_add(&rq->queuelist, &prev->queuelist);
+		printk("Added! \n");
+	}
 }
 
 //done
@@ -56,6 +88,8 @@ static int look_init_queue(struct request_queue *q, struct elevator_type *e)
 	struct elevator_queue *eq;
 	
 	eq = elevator_alloc(q, e);
+	nd = kmalloc_node(sizeof(*nd), GFP_KERNEL, q->node);
+	
 	if (!eq)
 		return -ENOMEM;
 	if(!nd)
@@ -87,7 +121,7 @@ static struct elevator_type elevator_look = {
         .elevator_add_req_fn 		= look_add_request,
         .elevator_former_req_fn 	= look_former_request,
         .elevator_latter_req_fn 	= look_latter_request,
-        .elevator_init_fn 		= look_init_queue,
+        .elevator_init_fn 		= look_init_queue, 
         .elevator_exit_fn 		= look_exit_queue,
     },
     .elevator_name = "look",
@@ -95,13 +129,13 @@ static struct elevator_type elevator_look = {
 };
 
 //done
-static int __init noop_init(void)
+static int __init look_init(void)
 {
 	return elv_register(&elevator_noop);
 }
 
 //done
-static void __exit noop_exit(void)
+static void __exit look_exit(void)
 {
 	elv_unregister(&elevator_noop);
 }

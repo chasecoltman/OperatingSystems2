@@ -13,7 +13,7 @@
 struct sstf_data{
 	struct list_head queue;
 	int current_direction;
-}
+};
 
 //done
 static void look_merged_requests (struct request_queue *q, struct request *rq, struct request *next)
@@ -24,7 +24,8 @@ static void look_merged_requests (struct request_queue *q, struct request *rq, s
 //done
 static int look_dispatch(struct request_queue *q, int force)
 {
-	struct look_data *nd = q->elevator->elevator_data;
+	printk("Beginning, look_dispatch.\n\n");
+	struct sstf_data *nd = q->elevator->elevator_data;
 	if (!list_empty(&nd->queue)) {
 		struct request *rq = list_entry(nd->queue.next, struct request, queuelist);
 		list_del_init(&rq->queuelist);
@@ -37,8 +38,10 @@ static int look_dispatch(struct request_queue *q, int force)
 //Needs to be done
 static void look_add_request(struct request_queue *q, struct request *rq)
 {
-	struct look_data *nd = q->elevator->elevator_data;
-	struct request *next, *previous, *current;
+	printk("Beginning, look_add_request.\n\n");
+
+	struct sstf_data *nd = q->elevator->elevator_data;
+	struct request *next, *previous;
 	
 	//Check to see if look_data is empty
 	printk("Attempting to add request \n");
@@ -56,27 +59,29 @@ static void look_add_request(struct request_queue *q, struct request *rq)
 		previous = list_entry(nd->queue.prev, struct request, queuelist);
 		while(blk_rq_pos(rq) > blk_rq_pos(next)){
 			next = list_entry(next->queuelist.next, struct request, queuelist);
-			prev = list_entry(prev->queuelist.prev, struct request, queuelist);
+			previous = list_entry(previous->queuelist.prev, struct request, queuelist);
 		}
-		list_add(&rq->queuelist, &prev->queuelist);
+		list_add(&rq->queuelist, &previous->queuelist);
 		printk("Added! \n");
 	}
 }
 
 //done
-static struct *look_former_request(struct request_queue *q, struct request *rq)
+static struct request *
+look_former_request(struct request_queue *q, struct request *rq)
 {
-	struct sstf_data *nd = -> q->elevator_data;
-	if (rq->queuelist.prev == %nd->queue)
-		reutrn NULL;
-	return list)entry(rq->queuelist.prev, struct request, queuelist);
+	struct sstf_data *nd = q->elevator->elevator_data;
+	if (rq->queuelist.prev == &nd->queue)
+		return NULL;
+	return list_entry(rq->queuelist.prev, struct request, queuelist);
 }
 
 //done
-static struct *look_latter_request(struct request_queue *q, struct request *rq)
+static struct request *
+look_latter_request(struct request_queue *q, struct request *rq)
 {
 	struct sstf_data *nd = q->elevator->elevator_data;
-	if(rq->queuelist.next == &nd.queue)
+	if(rq->queuelist.next == &nd->queue)
 		return NULL;
 	return list_entry(rq->queuelist.next, struct request, queuelist);
 }
@@ -84,7 +89,10 @@ static struct *look_latter_request(struct request_queue *q, struct request *rq)
 //done
 static int look_init_queue(struct request_queue *q, struct elevator_type *e)
 {
-	struct look_data *nd;
+	printk("Beginning, look_init_queue.\n\n");
+
+
+	struct sstf_data *nd;
 	struct elevator_queue *eq;
 	
 	eq = elevator_alloc(q, e);
@@ -108,7 +116,7 @@ static int look_init_queue(struct request_queue *q, struct elevator_type *e)
 //done
 static void look_exit_queue(struct elevator_queue *e)
 {
-	struct look_data *nd = e->elevator_data;
+	struct sstf_data *nd = e->elevator_data;
     BUG_ON(!list_empty(&nd->queue));
     kfree(nd);
 }
@@ -131,17 +139,17 @@ static struct elevator_type elevator_look = {
 //done
 static int __init look_init(void)
 {
-	return elv_register(&elevator_noop);
+	return elv_register(&elevator_look);
 }
 
 //done
 static void __exit look_exit(void)
 {
-	elv_unregister(&elevator_noop);
+	elv_unregister(&elevator_look);
 }
 
-module_init(noop_init);
-module_exit(noop_exit);
+module_init(look_init);
+module_exit(look_exit);
 
 
 MODULE_AUTHOR("Chase Coltman, Alec Zitzelberger");

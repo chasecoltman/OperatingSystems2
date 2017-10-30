@@ -24,7 +24,7 @@ static void look_merged_requests (struct request_queue *q, struct request *rq, s
 //done
 static int look_dispatch(struct request_queue *q, int force)
 {
-	printk("Beginning, look_dispatch.\n\n");
+	printk("Beginning, look_dispatch.\n");
 	struct sstf_data *nd = q->elevator->elevator_data;
 	if (!list_empty(&nd->queue)) {
 		struct request *rq = list_entry(nd->queue.next, struct request, queuelist);
@@ -38,7 +38,7 @@ static int look_dispatch(struct request_queue *q, int force)
 //Needs to be done
 static void look_add_request(struct request_queue *q, struct request *rq)
 {
-	printk("Beginning, look_add_request.\n\n");
+	printk("Beginning, look_add_request.\n");
 
 	struct sstf_data *nd = q->elevator->elevator_data;
 	struct request *next, *previous;

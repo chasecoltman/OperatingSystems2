@@ -1,5 +1,5 @@
 \documentclass[journal,10pt,onecolumn,compsoc]{IEEEtran} \usepackage[margin=1.0in]{geometry} \usepackage{pdfpages} 
-\usepackage{caption,graphicx,float} 
+%\usepackage{caption,graphicx,float} 
 \usepackage{listings}
 \usepackage{verbatim}
 \usepackage{enumitem}
@@ -61,15 +61,281 @@
     \end{itemize}
 \item How should the TA evaluate your work? Provide detailed steps to prove correctness.
 	\begin{itemize}
-    	\item TEMP LOREM IPSUM
+    	\item In order to check that our implementation works correctly, we will provide each and every file that modifications were made to within our Linux yocto file. First, the code in the kernel has to be made by first sourcing the environment variable, then running make -j4 all. This should not take as long as the first time we did this as not much will be changing. Once there, you verify that you are in bash and enter qemu-system-i386 -gdb tcp::5514 -S -nographic -kernel arch/x86/boot/bzImage -drive file=core-image-lsb-sdk-qemux86.ext4,if=ide -enable-kvm -net none -usb -localtime --no-reboot --append "root=/dev/hda rw console=ttyS0 debug" on console A. Then, on console B, you have to use source the environment variable once again, use \$GDB and then enter Target remote :5514 and Continue. This will cause the kernel to boot on console A. With the changes that we made in our files, this should cause the kernel to use our C-LOOK scheduler. You can verify this two ways. One you can go into make menuconfig and view all the current scheduler, and check to see if look is there by going to Enable the Block Layer -\textgreater IO Scheduler -\textgreater Default IO Scheduler, and you should see look as one of the options, if it hasn't been selected already. The other way is use the command cat /sys/block/hda/queue/scheduler, and it will display a list of all the schedulers currently implemented, and the one with [] around it is the currently selected one. If look is in the list and selected then that means that you have the look I/O scheduler selected and ready to go. What let us know that we had the right scheduler running was this picture:
+        
+       \includegraphics{possibly.PNG}
+       
+As you can see, we switched the schedulers in order to show the different printk() messages between NOOP and Look. When something gets added to our Look, it prints out the messages depending on out what the function is doing.
+
     \end{itemize}
 
 \end{enumerate}
 
 \section {Work.log for Alec Zitzelberger}
+\begin{enumerate}
+	\item Began working on researching the changes that would need to be made in order to develop our own scheduler.
+		\begin{enumerate}
+			\item Steps Taken:
+				\begin{enumerate}
+					\item Looked back through the quemu flag definitions in our last assignment
+                    \item Made a copy of the noop on my local directory in order to inspect it and understand the structure of the scheduler
+                    \item Went through notes and recorded lectures to relearn the elvator scheduling details that were in the lecture.
+					\item Looked into the aspects of LOOK and C-LOOK schedulers to determine what changes might need to be made for an implementation in the noop clone.
+				\end{enumerate}
+			\item Date - 10/26/2017
+			\item Time - Spent about 3-4 hours
+			\item End-point - A decent understanding of elevator algorithms
+			\item Finished - No, decided to meet up with my partner to discuss the changes that should be made. \\
+		\end {enumerate}
+        
+	\item Met with partner to discuss strategy and share information
+		\begin{enumerate}
+			\item Steps Taken:
+				\begin{enumerate}
+					\item Discussed our understanding of the LOOK and C-LOOK schedule types
+                    \item Discussed which kind to implement in the noop clone
+                    \item Divided up the work and how we planned to procede
+                    \item Discussed what other files we needed to change
+				\end{enumerate}
+			\item Date - 10/27/2017
+			\item Time - Spent about 3-4 hours
+			\item End-point - We had a gameplan for implementation and had decided that both of us would research how to get the kernel to recognize and boot the alternate scheduler
+			\item Finished - No, still had to finish initial coding and complete research \\
+		\end {enumerate}
+        
+	\item Researched how to get the kernel to use our code
+		\begin{enumerate}
+			\item Steps Taken:
+				\begin{enumerate}
+					\item Found documentation for how to change which scheduler program is used in Linux yocto
+                    \item Set to work learning the process
+				\end{enumerate}
+			\item Date - 10/28/2017
+			\item Time - Spent about 3 hours
+			\item End-point - A decent understanding of how to get Linux yocto to recognize our code
+			\item Finished - No, still had not tested the code that was being worked on \\
+		\end {enumerate}
+        
+	\item Began work adding to the files in the Linux yocto to get it to recognize the scheduler
+		\begin{enumerate}
+			\item Steps Taken:
+				\begin{enumerate}
+					\item Met up with partner and worked together in order to get the kernel to compile with our code
+                    \item Made sure that when the kernel booted it was using our scheduler instead of the noop
+				\end{enumerate}
+			\item Date - 10/29/2017
+			\item Time - Spent about 4 hours
+			\item End-point - Got the kernel to boot using our scheduler
+			\item Finished - No, needed to look into testing whether our scheduler behaved as intended \\
+		\end {enumerate}
+        
+	\item Met up in the morning to try and figure out if any additional testing could be done
+		\begin{enumerate}
+			\item Steps Taken:
+				\begin{enumerate}
+					\item Looked into various documentation concerning how to track the scheduler
+				\end{enumerate}
+			\item Date - 10/30/2017
+			\item Time - Spent about 2 hours
+			\item End-point - We had not yet found any better ways to test our solution
+			\item Finished - No, decided to meet up after classes to figure out if there were any problems \\
+		\end {enumerate}
+\end{enumerate}
 
 \section{Work.log for Chase Coltman}
+	\begin {enumerate}
+    	\item Began researching I/O Scheduling algorithms and main difference between NOOP and LOOK/CLOOK
+        \begin{enumerate}
+            \item Steps taken:
+        	\begin{enumerate}
+                  \item Googled I/O Scheduling Algorithms for use with Linux Qemu
+                  \item Looked through several different websites searching for an algorithm or something I could use, but didn't find one
+                  \item Next course of action was to ask in class (teacher/classmates) what to do next.
+     		\end{enumerate}   
+            \item Date - 10/21/2017
+            \item Time - 2-3 Hours
+            \item End-Point - A somewhat general idea of how the elevator algorithm works
+            \item Finished - Absolutely not, lots to do still  \\
+        \end{enumerate}
+    	
+        \item Began moving files over from the OS server like noop.iosched.c to look thorugh and see how it works
+        	\begin {enumerate}
+            	\item Steps Taken: 
+                	\begin{enumerate}
+                    	\item Copied noop-iosched.c to my local directory in order to read and understand
+                        \item I realized that the NOOP and LOOK are going to be very similar and I will only need to change little functions and translate it over to my sstf-iosched.c
+                    \end{enumerate}
+                \item Date: 10/28/2017
+                \item Time: 1-2 hours 
+                \item End-Point - Have the file, now need to translate it over and learn how to use it
+                \item Finished - No, lots more to do
+        	\end {enumerate}
+    
+   
+    \item Conversion to sstf-iosched.c
+        	\begin {enumerate}
+            	\item Steps Taken: 
+                	\begin{enumerate}
+                    	\item First step was to get all the functions translated over
+                        \item Second step was to fill in all the functions from noop that we could use for look
+                        \item adding was the only thing that needed to be changed so implemented the look elevator algorithm for that
+                    \end{enumerate}
+                \item Date: 10/28/2017
+                \item Time: 2-3 Hours
+                \item End-Point: sstf-iosched.c had been built correctly and was ready to implement on the linux qemu kernel
+                \item Finished: Getting closer, next step will be to install this scheduler onto the linux kernel and we should be good to go.
+        	\end {enumerate}
+    
+   
+    \item Implementing the scheduler
+        	\begin {enumerate}
+            	\item Steps Taken: 
+                	\begin{enumerate}
+                    	\item Transfered the file over and updated the Makefile to compile the sstf-iosched.c
+                        \item Got lots of errors, so began debugging with Alec
+                        \item Got the file to compile and build, but didn't seem to know how to test it, so we began adding print statements
+                        \item After about 2 hours of struggling we decided it was best to wait until morning to Ask the professor what we were doing wrong as well as other classmates.
+                    \end{enumerate}
+                \item Date: 10/29/2017
+                \item Time: 3-4 Hours
+                \item End-Point: Linux Kernel didn't give any errors indicating that the LOOK scheduler was working, now just need to find out how to prove it
+                \item Finished: Possibly, just need to prove it now \\
+        	\end {enumerate}
+    
+    \item Updated Kernel and Compiled with properly built files
+            \begin{enumerate}
+              	\item Steps Taken:
+                	\begin {enumerate}
+                    	\item Meet with Alec this morning to figure out what the issue was, but only hit deadends
+                        \item I realized that I wasn't using source env-yocto in bash before make -j4 all, which was giving us issues, so fixed that
+                        \item Once that was ran, I changed the path in my qemu command so I didn't have to keep grabbing the old bzImage file each time.
+                        \item Loaded Kernel and messages started being displayed from our sstf-iosched.c file, indicating that the file was able to compile, and be used as the current IO scheduler
+                    \end {enumerate}
+				\item Date: 10/30/2017
+            	\item Time: 3-4 Hours
+            	\item End-Point: The Kernel now has the fully implemented sstf-iosched.c
+            	\item Finished: Yes, just need to finish the write-up \\
+			\end{enumerate}
 
-\section{Commit.log GitHub}
+	\item Updated work.log and Write-Up
+    	\begin{enumerate}
+        	\item Steps Taken:
+            	\begin {enumerate}
+                	\item Updated the git.log and my work log as well as minor changes
+				\end {enumerate}
+            \item Data: 10/30/2017
+            \item Time: 1-2 Hours
+            \item End-Point: Write-up looks good, almost finished
+            \item Finished: Yes
+		\end{enumerate}
+ \end {enumerate}
  
-\end{document}`'
+ 
+\section{Commit.log GitHub}
+\begin {enumerate}
+	\item Creating Assignment 2 Folder
+	\begin {itemize}
+        \item Who: Chase Coltman
+        \item When: 10/26/2017
+	\end {itemize}
+    
+    \item Update readme
+	\begin {itemize}
+        \item Who: Chase Coltman
+        \item When: 10/26/2017
+	\end {itemize}
+    
+    \item Current Implementation for Dining Philosopher's Problem
+	\begin {itemize}
+        \item Who: Chase Coltman (created by Alec Zitzelberger)
+        \item When: 10/26/2017
+	\end {itemize}
+    
+    \item Create Kernel
+	\begin {itemize}
+        \item Who: Chase Coltman
+        \item When: 10/26/2017
+	\end {itemize}
+    
+    \item Adding mt.h for concurrency implemenation
+	\begin {itemize}
+        \item Who: Chase Coltman
+        \item When: 10/26/2017
+	\end {itemize}
+    
+    \item Updating Concurrency (implementing full randomization)
+	\begin {itemize}
+        \item Who: Chase Coltman
+        \item When: 10/27/2017
+	\end {itemize}
+    
+    \item Adding noop-iosched.c
+	\begin {itemize}
+        \item Who: Chase Coltman
+        \item When: 10/28/2017
+	\end {itemize}
+    
+    \item Adding shell
+	\begin {itemize}
+        \item Who: Chase Coltman
+        \item When: 10/28/2017
+	\end {itemize}
+    
+    \item Delete sstf-iosched.c
+	\begin {itemize}
+        \item Who: Chase Coltman
+        \item When: 10/28/2017
+	\end {itemize}
+    
+    \item Updating sstf-iosched.c
+	\begin {itemize}
+        \item Who: Chase Coltman
+        \item When: 10/28/2017
+	\end {itemize}
+    
+    \item Probably wrong but a start
+	\begin {itemize}
+        \item Who: Chase Coltman
+        \item When: 10/28/2017
+	\end {itemize}
+    
+    \item All the files we changed for the Kernel
+	\begin {itemize}
+        \item Who: Chase Coltman
+        \item When: 10/30/2017
+	\end {itemize}
+    
+    \item Create main.tex
+	\begin {itemize}
+        \item Who: Alec Zitzelberger
+        \item When: 10/30/2017
+	\end {itemize}
+    
+    \item Updating files one last time for submission
+	\begin {itemize}
+        \item Who: Chase Coltman
+        \item When: 10/30/2017
+	\end {itemize}
+    
+\end{enumerate}
+
+\begin{table}
+  \begin{tabular}{|l|l|l|}
+  \hline
+  Date & Action \\ \hline
+ 10/30/2017 & Creating Assignment 2 Folder & Chase Coltmane \\ 
+ 10/26/2017  & Update readme & Chase Coltman \\ 
+ 10/26/2017 & Create Kernel & Chase Coltman \\ 
+ 10/28/2017 & Adding noop-iosched.c and shell & Chase Coltman \\ 
+ 10/28/2017 & Updating sstf-iosched.c & Chase Coltman \\ 
+ 10/28/2017 & Probably wron but a start & Chase Coltman \\ 
+ 10/30/2017 & All the files we changed for the kernel & Chase Coltman \\ 
+ 10/30/2017 & Create main.tex & Alec Zitzelberger \\ 
+ 10/30/2017 & Updating files one last time for submission & Chase Coltman \\ 
+ 10/30/2017 & Pushed Project to MAIN repository. \\
+  \hline
+  \end{tabular}
+  \end{table}
+
+ 
+\end{document}

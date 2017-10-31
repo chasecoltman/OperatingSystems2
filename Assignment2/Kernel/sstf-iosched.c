@@ -12,7 +12,6 @@
 
 struct sstf_data{
 	struct list_head queue;
-	int current_direction;
 };
 
 //done
@@ -24,10 +23,10 @@ static void look_merged_requests (struct request_queue *q, struct request *rq, s
 //done
 static int look_dispatch(struct request_queue *q, int force)
 {
-	printk("Beginning, look_dispatch.\n");
 	struct sstf_data *nd = q->elevator->elevator_data;
 	if (!list_empty(&nd->queue)) {
 		struct request *rq = list_entry(nd->queue.next, struct request, queuelist);
+		printk("Dispatching: %llu \n", blk_rq_pos(rq));
 		list_del_init(&rq->queuelist);
 		elv_dispatch_sort(q, rq);
 		return 1;
@@ -38,31 +37,30 @@ static int look_dispatch(struct request_queue *q, int force)
 //Needs to be done
 static void look_add_request(struct request_queue *q, struct request *rq)
 {
-	printk("Beginning, look_add_request.\n");
-
+	//Source: https://www.kernel.org/doc/htmldocs/kernel-api/
 	struct sstf_data *nd = q->elevator->elevator_data;
-	struct request *next, *previous;
-	
+	struct list_head *curr_pos;
+	struct request *curr_node;	
 	//Check to see if look_data is empty
-	printk("Attempting to add request \n");
 	if(list_empty(&nd->queue))
 	{
 		// If empty add request to the queue
-		printk("Empty! \n");
-		list_add_tail(&rq->queuelist, &nd->queue);
+		printk("Empty List Add Successful! Added %llu\n", blk_rq_pos(rq));
+		list_add(&rq->queuelist, &nd->queue);
 	}
 	// Otherwise now we need to find a spot
 	else
 	{
 		//find spot to put the request in
-		next = list_entry(nd->queue.next, struct request, queuelist);
-		previous = list_entry(nd->queue.prev, struct request, queuelist);
-		while(blk_rq_pos(rq) > blk_rq_pos(next)){
-			next = list_entry(next->queuelist.next, struct request, queuelist);
-			previous = list_entry(previous->queuelist.prev, struct request, queuelist);
+		list_for_each(curr_pos, &nd->queue){
+			curr_node = list_entry(curr_pos, struct request, queuelist);
+			if(blk_rq_pos(curr_node) < blk_rq_pos(rq)){
+			//	printk("ADD SUCCESSFUL\n");
+				list_add(&rq->queuelist, &curr_node->queuelist);
+				printk("ADD SUCCESSFUL\n");
+				break;
+			}
 		}
-		list_add(&rq->queuelist, &previous->queuelist);
-		printk("Added! \n");
 	}
 }
 
@@ -89,7 +87,6 @@ look_latter_request(struct request_queue *q, struct request *rq)
 //done
 static int look_init_queue(struct request_queue *q, struct elevator_type *e)
 {
-	printk("Beginning, look_init_queue.\n\n");
 
 
 	struct sstf_data *nd;

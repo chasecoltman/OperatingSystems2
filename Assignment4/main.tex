@@ -1,0 +1,264 @@
+\documentclass[journal,10pt,onecolumn,compsoc]{IEEEtran} \usepackage[margin=1.0in]{geometry} \usepackage{pdfpages} 
+\usepackage{caption,graphicx,float} 
+\usepackage{listings}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage{url}
+\usepackage{amsmath}
+\graphicspath{/graphics} \setlength{\parskip}{\baselineskip} \setlength\parindent{24pt}
+\usepackage[english]{babel}
+%\usepackage{fullpage}
+
+\title{TensorFlow\texttrademark WYSIWYG GUI Design Document}
+\author{Group 14: Chase Coltman, Alec Zitzelberger}
+\date{\today}
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        \vspace*{1cm}
+        
+        \textbf{CS444 Program Assignment 4}
+        
+        \vspace{0.5cm}
+        Best Fit Memory Management 
+        
+        \vspace{1.5cm}
+        
+        \textbf{Alec Zitzelberger and Chase Coltman}
+        
+        \vfill
+        
+       
+        
+        \vspace{0.8cm}
+        
+        
+       % \includegraphics[width=0.4\textwidth]{university}
+        
+        Date December 2, 2017
+        
+    \end{center}
+\end{titlepage}
+
+\section {Questions}
+\begin {enumerate}
+\item What do you think the main point of this assignment is?
+	\begin{itemize}
+    	\item We believe that the main point of this assignment was to learn how linux manages memory using slob, how to implement a best fit algorithm for memory management, and how to observe the efficiency of our memory use based on which implementation was being used.
+        
+    \end{itemize}
+\item How did you personally approach the problem? Design decisions, algorithm, etc.
+	\begin{itemize}
+    	\item We approached this problem by first analyzing the slob.c file within the kernel and understanding how it worked. Then, we set to work attempting to make changes that could track for the best fitting location in memory for the new allocation. This is accomplished by looping through all of the pages and keeping a pointer that keeps track of the current best fitting place to stash the data. Every time a better spot is detected, the pointer gets updated, and then at the end of checking all of the pages, we allocate to the space in memory that fit the best. We then went into the menuconfig to get the kernel to use the slob.c, and then went to see if the kernel would run. We also added syscall functions and were able to get those working by editing the syscall files that are located in the architecture. We made the appropriate changes in include/linux/syscalls.h and arch/x86/syscalls/syscall\_32.tbl in order to inlcude our asmlinkage functionality.
+        
+    \end{itemize}
+\item How did you ensure your solution was correct? Testing details, for instance.
+	\begin{itemize}
+    	\item The way that we tested our program was to verify that we could run the module in the kernel. This portion was easy to test, as we quickly discovered that it wouldn't boot at all when we did our first best-fit implementation incorrectly. Then, when we did manage to get the system to boot, we went back into the slob.c and added syscall functions at the bottom of slov.c to work as syscalls that could be used to measure both the free and the claimed space in memory while the kernel runs. For the first-fit slob.c we ended up with claimed = 73, and free = 27. We scored a little better under our best-fit implementation with claimed = 70, free = 27. So not too bad of a change. It is worth noting that the best-fit implementation causes significantly more time to be needed for operations as it loops through all pages on the system in order to .
+        
+    \end{itemize}
+\item What did you learn? 
+	\begin{itemize}
+    	\item We learned how to properly implement a slob.c memory manager within the linux kernel, and also how to make new syscalls that can be used for things like checking the status of memory on the system.
+        
+    \end{itemize}
+\item How should the TA evaluate your work? Provide detailed steps to prove correctness.
+	\begin{itemize}
+    	\item In order to check that our implementation works correctly, load into the kernel normally with qemu-system-i386 -gdb tcp::5514 -S -nographic -kernel arch/x86/boot/bzImage -drive file=core-image-lsb-sdk-qemux86.ext4,if=ide -enable-kvm -netdev user,id=vmnic -device virtio-net,netdev=vmnic -usb -localtime --no-reboot --append "root=/dev/hda rw console=ttyS0 debug". Once the kernel is booted, there is a test.c file and you simply run gcc test.c -o test, and then, run ./test. This will print the results of our syscalls to the screen after some memory is allocated, showing the amounts of free and claimed memory.
+
+    \end{itemize}
+
+\end{enumerate}
+
+\pagebreak
+
+\section {Work.log for Alec Zitzelberger}
+\begin{enumerate}
+	\item Began working on researching the changes that would need to be made in order to develop our own best-fit version of slob.c.
+		\begin{enumerate}
+			\item Steps Taken:
+				\begin{enumerate}
+					\item Looked through slob.c in the mm directory of the Linux yocto, and got a general feel for how it worked.
+				\end{enumerate}
+			\item Date - 11/29/2017
+			\item Time - Spent about 3 hours
+			\item End-point - Had a decent understanding of how the slob.c worked and a general plan for how to implement a best-fit version.
+			\item Finished - No, had not implemented anything at this point.\\
+		\end {enumerate}
+        
+	\item Researched syscalls and how to track memory in the linux kernel.
+		\begin{enumerate}
+			\item Steps Taken:
+				\begin{enumerate}
+					\item Looked up a guide for how to add syscalls in linux.
+                    \item Looked into how to check the amount of used blocks of memory while the kernel runs.
+                    \item Discovered that one way to accomplish this was to keep track of it in the slob.c whenever memory was allocated.
+                    \item Made code for the syscalls in the slob.c
+				\end{enumerate}
+			\item Date - 11/30/2017
+			\item Time - Spent about 3-4 hours
+			\item End-point - Had a solid understanding of how to fully provide testing via syscalls.
+			\item Finished - No, still had to finish the best-fit code \\
+		\end {enumerate}
+        
+	\item Found out best-fit was broken
+		\begin{enumerate}
+			\item Steps Taken:
+				\begin{enumerate}
+					\item Myself and my partner worked to test our implementation of the slob.c
+                    \item We found that the kernel wouldn't boot with our implementation.
+                    \item Worked for several hours before deciding to use our one late assignment allowance to finish the following morning.
+                    \item Resolved to finish this write-up.
+				\end{enumerate}
+			\item Date - 12/1/2017
+			\item Time - Spent about 5 hours
+			\item End-point - Was rather confused about why our code wasn't working, but had a decent idea as to what it was supposed to be doing
+			\item Finished - No, still had not tested a functional version of the code \\
+		\end {enumerate}
+        
+	\item Worked with partner to finish the project
+		\begin{enumerate}
+			\item Steps Taken:
+				\begin{enumerate}
+					\item Worked with partner to ensure our implementation that he had finsished was correct.
+                    \item Began the write-up proper once we were sure our implementation was correct.
+                    \item Collected data and placed it in write-up.
+                    \item Finished my sections of the write-up.
+				\end{enumerate}
+			\item Date - 12/2/2017
+			\item Time - Spent about 4 hours
+			\item End-point - Finished project and my portions of the write-up
+			\item Finished - Yes, essentially all of the work was completed. \\
+		\end {enumerate}
+    \end{enumerate}
+	
+
+\section{Work.log for Chase Coltman}
+	\begin {enumerate}
+    	\item Began researching for slob.c
+        \begin{enumerate}
+            \item Steps taken:
+        	\begin{enumerate}
+                  \item Reviewed assignment description and analyzed all hints provided
+                  \item Found and reviewed current slob.c implementation
+                  \item Next course of action was to ask in class (teacher/classmates) what to do next.
+     		\end{enumerate}   
+            \item Date - 11/24/2017
+            \item Time - 1-2 Hours
+            \item End-Point - A somewhat general idea of how the slob.c allocation happens, and what is going to be required 
+            \item Finished - Absolutely not, lots to do still  \\
+        \end{enumerate}
+	\end{enumerate}
+    
+ 	\begin {enumerate}
+    	\item Updated slob.c and pushed to github
+        \begin{enumerate}
+            \item Steps taken:
+        	\begin{enumerate}
+                  \item Not much was done here, simply pushed the slob.c to group repo
+                  \item Next course of action was find where to make changes
+     		\end{enumerate}   
+            \item Date - 11/27/2017
+            \item Time - .2 Hours
+            \item End-Point - GitHub has backup copy of slob.c
+            \item Finished - No  \\
+        \end{enumerate}
+	\end{enumerate}
+	
+    \begin {enumerate}
+    	\item Updated slob.c to incorporate best-fit algorithm
+        \begin{enumerate}
+            \item Steps taken:
+        	\begin{enumerate}
+                  \item Implemented the best-fit algorithm inside the current slob.c file
+                  \item Ran into lots of errors as those seem to happen a lot with these assignments
+                  \item Implementing the best-fit proved to be easier then expected (minus random errors), only had to change a few lines inside slob\_alloc to make best\_fit work
+     		\end{enumerate}   
+            \item Date - 11/27/2017
+            \item Time - 2-3 Hours
+            \item End-Point - Implementation is in place, need to create test functions for them now
+            \item Finished - No  \\
+        \end{enumerate}
+	\end{enumerate}
+    
+    \begin {enumerate}
+    	\item Found location of other needed edits
+        \begin{enumerate}
+            \item Steps taken:
+        	\begin{enumerate}
+                  \item Created the test functions, but ran into issues with syscalls
+                  \item Found the location, and updated syscalls\_32.tbl and syscalls.h
+                  \item Next course of action was create new test functions and include the asmlinkage functions
+     		\end{enumerate}   
+            \item Date - 11/28/2017
+            \item Time - 1-2 Hours
+            \item End-Point - GitHub has backup copy of slob.c
+            \item Finished - No  \\
+        \end{enumerate}
+	\end{enumerate}
+    
+    \begin {enumerate}
+    	\item Implemented test functions
+        \begin{enumerate}
+            \item Steps taken:
+        	\begin{enumerate}
+                  \item Created the test functions, but ran into issues with syscalls
+                  \item Found the location, and updated syscalls\_32.tbl and syscalls.h
+                  \item Next course of action was create new test functions and include the asmlinkage functions
+     		\end{enumerate}   
+            \item Date - 11/28/2017
+            \item Time - 1-2 Hours
+            \item End-Point - Created edits to file locations
+            \item Finished - No  \\
+        \end{enumerate}
+	\end{enumerate}
+    
+    \begin {enumerate}
+    	\item Tested functionality between first-fit and best-fit
+        \begin{enumerate}
+            \item Steps taken:
+        	\begin{enumerate}
+                  \item Compared and contrasted between the first and best fit algorithms to make sure that our implementation was correct
+                  \item Ran into several more errors, but eventually got everything working and printing
+                  \item Next course of action was create the write-up
+     		\end{enumerate}   
+            \item Date - 12/1/2017
+            \item Time - 5-6 Hours
+            \item End-Point - Created edits to file locations
+            \item Finished - No, need to do write-up \\
+        \end{enumerate}
+	\end{enumerate}
+    
+    \begin {enumerate}
+    	\item Create work.long for paper
+        \begin{enumerate}
+            \item Steps taken:
+        	\begin{enumerate}
+                  \item Updated .tex file with my work log
+     		\end{enumerate}   
+            \item Date - 12/2/2017
+            \item Time - 1-2 Hours
+            \item End-Point - Document Created
+            \item Finished - Yes \\
+        \end{enumerate}
+	\end{enumerate}
+%
+\pagebreak
+
+\begin{table}
+  \begin{tabular}{|l|l|l|}
+  \hline
+  Date & Action & Author \\ \hline
+ 11/15/2017 & Creating Assignment 3 Folder & Alec Zitzelberger \\ 
+ 11/15/2017  & Adding IEEEtran & Alec Zitzelberger \\ 
+ 11/15/2017 & Adding Makefile & Alec Zitzelberger \\ 
+ 11/15/2017 & Adding block module & Alec Zitzelberger \\ 
+ 11/15/2017 & Adding Patch & Alec Zitzelberger \\ 
+ 11/15/2017 & Uploading the appropriate makefile and Kconfig & Alec Zitzelberger \\ 
+  \hline
+  \end{tabular}
+  \end{table}
+
+ 
+\end{document}

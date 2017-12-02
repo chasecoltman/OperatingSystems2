@@ -1,0 +1,101 @@
+Common subdirectories: linux-yocto-3.19.2/arch and patchforyocto/arch
+Common subdirectories: linux-yocto-3.19.2/block and patchforyocto/block
+diff linux-yocto-3.19.2/.config patchforyocto/.config
+148a149
+> CONFIG_MEMCG_KMEM=y
+212a214
+> CONFIG_SLUB_DEBUG=y
+215,216c217,219
+< # CONFIG_SLUB is not set
+< CONFIG_SLOB=y
+---
+> CONFIG_SLUB=y
+> # CONFIG_SLOB is not set
+> CONFIG_SLUB_CPU_PARTIAL=y
+250a254
+> CONFIG_HAVE_ALIGNED_STRUCT_PAGE=y
+273a278
+> CONFIG_SLABINFO=y
+1175,1176d1179
+< CONFIG_BLK_DEV_EBD=m
+< CONFIG_BLK_DEV_EBL=m
+3788a3792,3793
+> # CONFIG_SLUB_DEBUG_ON is not set
+> # CONFIG_SLUB_STATS is not set
+diff linux-yocto-3.19.2/.config.old patchforyocto/.config.old
+330c330
+< # CONFIG_DEFAULT_LOOK is not set
+---
+> CONFIG_DEFAULT_LOOK=y
+332c332
+< CONFIG_DEFAULT_CFQ=y
+---
+> # CONFIG_DEFAULT_CFQ is not set
+334c334
+< CONFIG_DEFAULT_IOSCHED="cfq"
+---
+> CONFIG_DEFAULT_IOSCHED="look"
+1180,1181d1179
+< CONFIG_BLK_DEV_EBD=m
+< CONFIG_BLK_DEV_EBL=m
+Binary files linux-yocto-3.19.2/core-image-lsb-sdk-qemux86.ext4 and patchforyocto/core-image-lsb-sdk-qemux86.ext4 differ
+Common subdirectories: linux-yocto-3.19.2/crypto and patchforyocto/crypto
+Common subdirectories: linux-yocto-3.19.2/Documentation and patchforyocto/Documentation
+Common subdirectories: linux-yocto-3.19.2/drivers and patchforyocto/drivers
+Common subdirectories: linux-yocto-3.19.2/firmware and patchforyocto/firmware
+Common subdirectories: linux-yocto-3.19.2/fs and patchforyocto/fs
+Common subdirectories: linux-yocto-3.19.2/.git and patchforyocto/.git
+Common subdirectories: linux-yocto-3.19.2/include and patchforyocto/include
+Common subdirectories: linux-yocto-3.19.2/init and patchforyocto/init
+Common subdirectories: linux-yocto-3.19.2/ipc and patchforyocto/ipc
+Common subdirectories: linux-yocto-3.19.2/kernel and patchforyocto/kernel
+Common subdirectories: linux-yocto-3.19.2/lib and patchforyocto/lib
+Only in patchforyocto/: .missing-syscalls.d
+Common subdirectories: linux-yocto-3.19.2/mm and patchforyocto/mm
+Only in patchforyocto/: modules.builtin
+Only in patchforyocto/: modules.order
+diff linux-yocto-3.19.2/Module.symvers patchforyocto/Module.symvers
+3171a3172
+> 0x00000000	kmalloc_caches	vmlinux	EXPORT_SYMBOL
+4452a4454
+> 0x00000000	kmem_cache_alloc_trace	vmlinux	EXPORT_SYMBOL
+5080a5083
+> 0x00000000	tcp_proto_cgroup	vmlinux	EXPORT_SYMBOL
+5928a5932
+> 0x00000000	sock_update_memcg	vmlinux	EXPORT_SYMBOL
+6602d6605
+< 0x00000000	slob_alloc_node	vmlinux	EXPORT_SYMBOL
+6687a6691
+> 0x00000000	tcp_init_cgroup	vmlinux	EXPORT_SYMBOL
+7055a7060
+> 0x00000000	tcp_destroy_cgroup	vmlinux	EXPORT_SYMBOL
+7795a7801
+> 0x00000000	memcg_kmem_enabled_key	vmlinux	EXPORT_SYMBOL
+8604a8611
+> 0x00000000	memcg_socket_limit_enabled	vmlinux	EXPORT_SYMBOL
+8908a8916
+> 0x00000000	kmalloc_dma_caches	vmlinux	EXPORT_SYMBOL
+Common subdirectories: linux-yocto-3.19.2/net and patchforyocto/net
+Common subdirectories: linux-yocto-3.19.2/samples and patchforyocto/samples
+Common subdirectories: linux-yocto-3.19.2/scripts and patchforyocto/scripts
+Common subdirectories: linux-yocto-3.19.2/security and patchforyocto/security
+Common subdirectories: linux-yocto-3.19.2/sound and patchforyocto/sound
+Only in patchforyocto/: System.map
+Only in linux-yocto-3.19.2/: test.c
+Only in patchforyocto/: .tmp_kallsyms1.o
+Only in patchforyocto/: .tmp_kallsyms2.o
+Only in patchforyocto/: .tmp_System.map
+Only in patchforyocto/: .tmp_versions
+Only in patchforyocto/: .tmp_vmlinux1
+Only in patchforyocto/: .tmp_vmlinux2
+Common subdirectories: linux-yocto-3.19.2/tools and patchforyocto/tools
+Common subdirectories: linux-yocto-3.19.2/usr and patchforyocto/usr
+diff linux-yocto-3.19.2/.version patchforyocto/.version
+1c1
+< 54
+---
+> 32
+Common subdirectories: linux-yocto-3.19.2/virt and patchforyocto/virt
+Only in patchforyocto/: vmlinux
+Only in patchforyocto/: .vmlinux.cmd
+Only in patchforyocto/: vmlinux.o
